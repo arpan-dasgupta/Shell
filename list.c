@@ -16,7 +16,7 @@ int file_select(const struct dirent *entry)
     return y;
 }
 
-void listfiles(char home[], char *dir, char *flags)
+void listfiles(char home[], char *dir, int l_flag, int a_flag)
 {
     struct dirent **files;
     int count, i;
@@ -46,8 +46,23 @@ void listfiles(char home[], char *dir, char *flags)
     count = scandir(dir, &files, file_select, alphasort);
     if (count < 0)
         perror("Error ");
-    printf("Number of files = %d\n", count);
-    for (i = 1; i < count + 1; ++i)
-        printf("%s\n", files[i - 1]->d_name);
+    if (l_flag == 0)
+    {
+        for (i = 1; i < count + 1; ++i)
+        {
+            char *x = files[i - 1]->d_name;
+            if (a_flag == 1 || x[0] != '.')
+                printf("%s\n", x);
+        }
+    }
+    else
+    {
+        for (i = 1; i < count + 1; ++i)
+        {
+            char *x = files[i - 1]->d_name;
+            if (a_flag == 1 || x[0] != '.')
+                printf("%s\n", x);
+        }
+    }
     printf("\n"); /* flush buffer */
 }
