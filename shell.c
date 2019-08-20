@@ -26,38 +26,39 @@ int main(int argc, char const *argv[])
     // printf("\n");
 
     // echo("hi");
-    // pwd();
-    // cd("/home/arpan/Documents");
-    // pwd();
-    // cd("~");
-    // pwd();
-    // listfiles("~");
-    while (1)
-    {
-        char curdir[1024];
-        char input[100];
-        getcwd(curdir, sizeof(curdir));
-        int i, f = 1;
-        for (i = 0; i < strlen(home); i++)
-        {
-            if (curdir[i] != home[i])
-                f = 0;
-        }
-        if (f == 1)
-        {
-            curdir[0] = '~';
-            int f = 1;
-            for (; i < strlen(curdir); i++)
-                curdir[f++] = curdir[i];
-            curdir[f] = '\0';
-        }
-        makeblue;
-        printf("%s @ %s >>> ", username, curdir);
-        makedef;
-        scanf(" %s", input);
-
-        break;
-    }
+    pwd();
+    cd(home, "/home/arpan/Documents/..");
+    pwd();
+    cd(home, "~/Test");
+    pwd();
+    // listfiles(home, "~/../Shell", "");
+    // listfiles(home, "/home/arpan/Documents/..", "");
+    // while (1)
+    // {
+    //     char curdir[1024];
+    //     char input[1024];
+    //     char *sys_name = getenv("SESSION");
+    //     getcwd(curdir, sizeof(curdir));
+    //     int i, f = 1;
+    //     for (i = 0; i < strlen(home); i++)
+    //     {
+    //         if (curdir[i] != home[i])
+    //             f = 0;
+    //     }
+    //     if (f == 1)
+    //     {
+    //         curdir[0] = '~';
+    //         int f = 1;
+    //         for (; i < strlen(curdir); i++)
+    //             curdir[f++] = curdir[i];
+    //         curdir[f] = '\0';
+    //     }
+    //     makeblue;
+    //     printf("< %s @ %s:%s > >> ", username, sys_name, curdir);
+    //     makedef;
+    //     scanf(" %s", input);
+    //     chooseCommand(input);
+    // }
 
     return 0;
 }

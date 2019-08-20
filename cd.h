@@ -1,1 +1,1 @@
-void cd(char *);
+void cd(char *, char *);

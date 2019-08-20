@@ -1,1 +1,1 @@
-void listfiles(char *);
+void listfiles(char[], char *, char *);
