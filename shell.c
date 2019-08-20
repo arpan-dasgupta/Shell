@@ -5,12 +5,15 @@
 #include <sys/types.h>
 #include <sys/dir.h>
 #include <string.h>
+#include "command.h"
 #include "init.h"
 #include "list.h"
 #include "pwd.h"
 #include "echo.h"
 #include "cd.h"
 
+#define makeblue printf("\033[1;34m")
+#define makedef printf("\033[0m")
 #define clear() printf("\033[H\033[J")
 
 int main(int argc, char const *argv[])
@@ -34,9 +37,25 @@ int main(int argc, char const *argv[])
         char curdir[1024];
         char input[100];
         getcwd(curdir, sizeof(curdir));
+        int i, f = 1;
+        for (i = 0; i < strlen(home); i++)
+        {
+            if (curdir[i] != home[i])
+                f = 0;
+        }
+        if (f == 1)
+        {
+            curdir[0] = '~';
+            int f = 1;
+            for (; i < strlen(curdir); i++)
+                curdir[f++] = curdir[i];
+            curdir[f] = '\0';
+        }
+        makeblue;
         printf("%s @ %s >>> ", username, curdir);
+        makedef;
         scanf(" %s", input);
-        printf("%s ", input);
+
         break;
     }
 
