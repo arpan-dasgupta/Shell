@@ -9,6 +9,7 @@
 #include "pwd.h"
 #include "echo.h"
 #include "cd.h"
+#include "others.h"
 
 #define clear() printf("\033[H\033[J")
 
@@ -126,7 +127,7 @@ void chooseCommand(char home[], char *str)
                     dir = subtoken;
             listfiles(home, dir, l_flag, a_flag);
         }
-        else if (strcmp(subtoken, "exit") == 0)
+        else if (strcmp(subtoken, "exit") == 0 || strcmp(subtoken, "q") == 0 || strcmp(subtoken, "quit") == 0)
         {
             exit(0);
         }
@@ -134,13 +135,24 @@ void chooseCommand(char home[], char *str)
         {
             clear();
         }
-        // for (i = 0;i<)
-        // for (str2 = token;; str2 = NULL)
-        // {             );
-        //     subtoken = strtok_r(str2, argv[3], &saveptr2);
-        //     if (subtoken == NULL)
-        //         break;
-        //     printf(" --> %s\n", subtoken);
-        // }
+        else
+        {
+            char *subt[100];
+            subt[0] = subtoken;
+            subt[0] = trimwhitespace(subt[0]);
+            int i = 1;
+            while (i < 100)
+            {
+                subt[i] = strtok_r(NULL, " ", &saveptr2);
+                if (subt[i] == NULL)
+                    break;
+                subt[i] = trimwhitespace(subt[i]);
+                i++;
+            }
+            if (subtoken[strlen(subtoken) - 1] == '&')
+                otherCommands(subtoken, subt, 1);
+            else
+                otherCommands(subtoken, subt, 0);
+        }
     }
 }
