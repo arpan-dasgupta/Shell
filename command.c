@@ -10,6 +10,7 @@
 #include "echo.h"
 #include "cd.h"
 #include "others.h"
+#include "pinfo.h"
 
 #define clear() printf("\033[H\033[J")
 
@@ -134,6 +135,16 @@ void chooseCommand(char home[], char *str)
         else if (strcmp(subtoken, "clear") == 0)
         {
             clear();
+        }
+        else if (strcmp(subtoken, "pinfo") == 0)
+        {
+            subtoken = strtok_r(NULL, " ", &saveptr2);
+            if (subtoken == NULL)
+                pinfo(0, "");
+            else
+            {
+                pinfo(1, trimwhitespace(subtoken));
+            }
         }
         else
         {

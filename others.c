@@ -9,7 +9,6 @@
 
 void otherCommands(char *com, char **str, int bg)
 {
-    printf("%d ++ ", bg);
     pid_t pid = fork();
     if (pid == -1)
     {
