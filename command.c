@@ -26,12 +26,13 @@ char *trimwhitespace(char *str)
     return str;
 }
 
-void chooseCommand(char home[], char *str)
+int *chooseCommand(char home[], char *str)
 {
     char *str1, *str2, *subtoken, *subtoken1, *subtoken2;
     char *token;
     char *saveptr1, *saveptr2;
-    int j, i;
+    int j, i, retcount = 0;
+    int temp[1024];
 
     for (j = 1, str1 = str;; j++, str1 = NULL)
     {
@@ -165,7 +166,17 @@ void chooseCommand(char home[], char *str)
                 }
                 i++;
             }
-            otherCommands(subtoken, subt, fl);
+            int x = otherCommands(subtoken, subt, fl);
+            if (fl == 1 && x != -1)
+            {
+                temp[retcount++] = x;
+            }
         }
     }
+
+    int *ans = (int *)malloc(sizeof(int) * (retcount + 1));
+    ans[0] = retcount;
+    for (i = 0; i < retcount; i++)
+        ans[i + 1] = temp[i];
+    return ans;
 }

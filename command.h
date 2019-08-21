@@ -1,1 +1,1 @@
-void chooseCommand(char[], char *);
+int *chooseCommand(char[], char *);

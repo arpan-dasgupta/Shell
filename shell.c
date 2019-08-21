@@ -16,6 +16,7 @@
 #define makedef printf("\033[0m")
 #define clear() printf("\033[H\033[J")
 
+int working_proc[2048], status[2048], count = 0, fin = 0;
 int main(int argc, char const *argv[])
 {
     char *username = getenv("USER");
@@ -40,6 +41,41 @@ int main(int argc, char const *argv[])
         char *sys_name = getenv("SESSION");
         getcwd(curdir, sizeof(curdir));
         int i, f = 1;
+
+        for (i = 0; i < count; i++)
+        {
+            if (status[i] == 0)
+                continue;
+            // printf("%d\n", working_proc[i]);
+            int sst;
+            int v = waitpid(working_proc[i], &sst, WNOHANG);
+            if (v == -1)
+            {
+                perror("waitpid failed");
+            }
+            if (v == 0)
+            {
+                continue;
+            }
+            if (WIFEXITED(sst))
+            {
+                const int es = WEXITSTATUS(sst);
+                printf("Process with PID - %d\n", working_proc[i]);
+                if (es == 0)
+                {
+                    printf("Exited normally\n");
+                }
+                else
+                {
+                    printf("Exited with exit code %d", es);
+                }
+                status[i] = 0;
+                fin++;
+            }
+        }
+        if (count - fin > 0)
+            printf("%d background processes\n", count - fin);
+
         for (i = 0; i < strlen(home); i++)
         {
             if (curdir[i] != home[i])
@@ -62,7 +98,12 @@ int main(int argc, char const *argv[])
             input[cur++] = ch;
         }
         input[cur] = '\0';
-        chooseCommand(home, input);
+        int *a = chooseCommand(home, input);
+        for (i = 1; i <= a[0]; i++)
+        {
+            working_proc[count++] = a[i];
+            status[count - 1] = 1;
+        }
     }
 
     return 0;

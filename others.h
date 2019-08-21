@@ -1,1 +1,1 @@
-void otherCommands(char *, char **, int);
+int otherCommands(char *, char **, int);
