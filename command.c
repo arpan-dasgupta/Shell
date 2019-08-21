@@ -140,19 +140,21 @@ void chooseCommand(char home[], char *str)
             char *subt[100];
             subt[0] = subtoken;
             subt[0] = trimwhitespace(subt[0]);
-            int i = 1;
+            int i = 1, fl = 0;
             while (i < 100)
             {
                 subt[i] = strtok_r(NULL, " ", &saveptr2);
                 if (subt[i] == NULL)
                     break;
                 subt[i] = trimwhitespace(subt[i]);
+                if (strcmp(subt[i], "&") == 0)
+                {
+                    fl = 1;
+                    i--;
+                }
                 i++;
             }
-            if (subtoken[strlen(subtoken) - 1] == '&')
-                otherCommands(subtoken, subt, 1);
-            else
-                otherCommands(subtoken, subt, 0);
+            otherCommands(subtoken, subt, fl);
         }
     }
 }

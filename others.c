@@ -9,6 +9,7 @@
 
 void otherCommands(char *com, char **str, int bg)
 {
+    printf("%d ++ ", bg);
     pid_t pid = fork();
     if (pid == -1)
     {
@@ -23,7 +24,9 @@ void otherCommands(char *com, char **str, int bg)
     }
     else
     {
-        wait(NULL);
-        return;
+        int status;
+        if (bg == 0)
+            waitpid(pid, &status, 0);
     }
+    return;
 }
