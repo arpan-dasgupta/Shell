@@ -11,6 +11,7 @@
 #include "cd.h"
 #include "others.h"
 #include "pinfo.h"
+#include "history.h"
 
 #define clear() printf("\033[H\033[J")
 
@@ -41,6 +42,7 @@ struct comm *chooseCommand(char home[], char *str)
     int temp[1024];
     char *t2[1024];
 
+    histAdd(str);
     for (j = 1, str1 = str;; j++, str1 = NULL)
     {
         token = strtok_r(str1, ";", &saveptr1);
@@ -152,6 +154,16 @@ struct comm *chooseCommand(char home[], char *str)
             else
             {
                 pinfo(1, trimwhitespace(subtoken));
+            }
+        }
+        else if (strcmp(subtoken, "history") == 0)
+        {
+            subtoken = strtok_r(NULL, " ", &saveptr2);
+            if (subtoken == NULL)
+                histDisp("10");
+            else
+            {
+                histDisp(subtoken);
             }
         }
         else
