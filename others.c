@@ -18,7 +18,7 @@ int otherCommands(char *com, char **str, int bg)
     else if (pid == 0)
     {
         if (execvp(str[0], str) < 0)
-            printf("Could not execute command..\n");
+            printf("ERROR: Invalid command\n");
         setpgid(0, 0);
         close(0);
         close(1);

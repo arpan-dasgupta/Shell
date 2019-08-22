@@ -51,7 +51,7 @@ struct comm *chooseCommand(char home[], char *str)
             break;
         token = trimwhitespace(token);
         // printf("%d: %s\n", j, token);
-        subtoken = strtok_r(token, " ", &saveptr2);
+        subtoken = strtok_r(token, " \t", &saveptr2);
         if (subtoken == NULL)
             continue;
         if (strcmp(subtoken, "pwd") == 0)
@@ -70,7 +70,7 @@ struct comm *chooseCommand(char home[], char *str)
         }
         else if (strcmp(subtoken, "cd") == 0)
         {
-            subtoken = strtok_r(NULL, " ", &saveptr2);
+            subtoken = strtok_r(NULL, " \t", &saveptr2);
             if (subtoken == NULL)
                 subtoken = "";
             cd(home, subtoken);
@@ -80,13 +80,13 @@ struct comm *chooseCommand(char home[], char *str)
         {
             int l_flag = 0, a_flag = 0;
             char *dir = "";
-            subtoken = strtok_r(NULL, " ", &saveptr2);
+            subtoken = strtok_r(NULL, " \t", &saveptr2);
             if (subtoken == NULL)
                 subtoken = "";
-            subtoken1 = strtok_r(NULL, " ", &saveptr2);
+            subtoken1 = strtok_r(NULL, " \t", &saveptr2);
             if (subtoken1 == NULL)
                 subtoken1 = "";
-            subtoken2 = strtok_r(NULL, " ", &saveptr2);
+            subtoken2 = strtok_r(NULL, " \t", &saveptr2);
             if (subtoken2 == NULL)
                 subtoken2 = "";
             if (strlen(subtoken2) > 0)
@@ -149,7 +149,7 @@ struct comm *chooseCommand(char home[], char *str)
         }
         else if (strcmp(subtoken, "pinfo") == 0)
         {
-            subtoken = strtok_r(NULL, " ", &saveptr2);
+            subtoken = strtok_r(NULL, " \t", &saveptr2);
             if (subtoken == NULL)
                 pinfo(0, "");
             else
@@ -159,7 +159,7 @@ struct comm *chooseCommand(char home[], char *str)
         }
         else if (strcmp(subtoken, "history") == 0)
         {
-            subtoken = strtok_r(NULL, " ", &saveptr2);
+            subtoken = strtok_r(NULL, " \t", &saveptr2);
             if (subtoken == NULL)
                 histDisp("10");
             else
@@ -169,8 +169,24 @@ struct comm *chooseCommand(char home[], char *str)
         }
         else if (strcmp(subtoken, "nightswatch") == 0)
         {
-            subtoken = strtok_r(NULL, " ", &saveptr2);
-            nightint(subtoken);
+            subtoken = strtok_r(NULL, " \t", &saveptr2);
+            subtoken1 = strtok_r(NULL, " \t", &saveptr2);
+            subtoken2 = strtok_r(NULL, " \t", &saveptr2);
+            subtoken = trimwhitespace(subtoken);
+            subtoken1 = trimwhitespace(subtoken1);
+            subtoken2 = trimwhitespace(subtoken2);
+            if (strcmp(subtoken, "-n") != 0)
+            {
+                printf("Invalid command\n");
+            }
+            if (strcmp(subtoken2, "interrupt") == 0)
+                nightint(subtoken1);
+            else if (strcmp(subtoken2, "dirty") == 0)
+                nightdirt(subtoken1);
+            else
+            {
+                printf("Invalid command\n");
+            }
         }
         else
         {
@@ -180,7 +196,7 @@ struct comm *chooseCommand(char home[], char *str)
             int i = 1, fl = 0;
             while (i < 100)
             {
-                subt[i] = strtok_r(NULL, " ", &saveptr2);
+                subt[i] = strtok_r(NULL, " \t", &saveptr2);
                 if (subt[i] == NULL)
                     break;
                 subt[i] = trimwhitespace(subt[i]);
