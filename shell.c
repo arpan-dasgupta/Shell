@@ -19,7 +19,7 @@
 struct comm
 {
     int pid;
-    char *pname;
+    char pname[1000];
 } working_proc[2048];
 
 int status[2048], count = 0, fin = 0;
@@ -108,7 +108,8 @@ int main(int argc, char const *argv[])
         for (i = 1; i <= a[0].pid; i++)
         {
             working_proc[count].pid = a[i].pid;
-            working_proc[count].pname = a[i].pname;
+            strcpy(working_proc[count].pname, a[i].pname);
+            printf("%s %d\n", working_proc[count].pname, working_proc[count].pid);
             count++;
             status[count - 1] = 1;
         }

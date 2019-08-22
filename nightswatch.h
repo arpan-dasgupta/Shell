@@ -1,0 +1,1 @@
+void nightint(char *);

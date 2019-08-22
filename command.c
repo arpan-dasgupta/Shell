@@ -12,13 +12,14 @@
 #include "others.h"
 #include "pinfo.h"
 #include "history.h"
+#include "nightswatch.h"
 
 #define clear() printf("\033[H\033[J")
 
 struct comm
 {
     int pid;
-    char *pname;
+    char pname[1000];
 };
 
 char *trimwhitespace(char *str)
@@ -166,6 +167,11 @@ struct comm *chooseCommand(char home[], char *str)
                 histDisp(subtoken);
             }
         }
+        else if (strcmp(subtoken, "nightswatch") == 0)
+        {
+            subtoken = strtok_r(NULL, " ", &saveptr2);
+            nightint(subtoken);
+        }
         else
         {
             char *subt[100];
@@ -199,7 +205,9 @@ struct comm *chooseCommand(char home[], char *str)
     for (i = 0; i < retcount; i++)
     {
         ans[i + 1].pid = temp[i];
-        ans[i + 1].pname = t2[i];
+        // ans[i + 1].pname = t2[i];
+        for (j = 0; j < strlen(t2[i]); j++)
+            ans[i + 1].pname[j] = t2[i][j];
     }
     return ans;
 }
