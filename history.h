@@ -1,2 +1,2 @@
-void histAdd(char *);
 void histDisp(char *);
+void histAdd(char *);

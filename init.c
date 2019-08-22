@@ -4,6 +4,7 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <string.h>
+#include "pwd.h"
 
 #define makered printf("\033[1;31m")
 #define makedef printf("\033[0m")
@@ -12,10 +13,11 @@
 void initialise(char *username)
 {
     clear();
-    // char *username = getenv("USER");
     makered;
     printf("Welcome to ASH ( Arpan's SHell )\n");
-    printf("User - %s\n\n", username);
+    printf("User - %s\n", username);
+    printf("Current home - ");
+    pwd();
+    printf("\n\n");
     makedef;
-    // sleep(3);
 }
