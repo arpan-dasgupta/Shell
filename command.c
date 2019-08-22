@@ -14,6 +14,12 @@
 
 #define clear() printf("\033[H\033[J")
 
+struct comm
+{
+    int pid;
+    char *pname;
+};
+
 char *trimwhitespace(char *str)
 {
     char *end;
@@ -26,13 +32,14 @@ char *trimwhitespace(char *str)
     return str;
 }
 
-int *chooseCommand(char home[], char *str)
+struct comm *chooseCommand(char home[], char *str)
 {
     char *str1, *str2, *subtoken, *subtoken1, *subtoken2;
     char *token;
     char *saveptr1, *saveptr2;
     int j, i, retcount = 0;
     int temp[1024];
+    char *t2[1024];
 
     for (j = 1, str1 = str;; j++, str1 = NULL)
     {
@@ -169,14 +176,18 @@ int *chooseCommand(char home[], char *str)
             int x = otherCommands(subtoken, subt, fl);
             if (fl == 1 && x != -1)
             {
+                t2[retcount] = subtoken;
                 temp[retcount++] = x;
             }
         }
     }
 
-    int *ans = (int *)malloc(sizeof(int) * (retcount + 1));
-    ans[0] = retcount;
+    struct comm *ans = (struct comm *)malloc(sizeof(struct comm) * (retcount + 1));
+    ans[0].pid = retcount;
     for (i = 0; i < retcount; i++)
-        ans[i + 1] = temp[i];
+    {
+        ans[i + 1].pid = temp[i];
+        ans[i + 1].pname = t2[i];
+    }
     return ans;
 }

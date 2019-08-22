@@ -16,7 +16,13 @@
 #define makedef printf("\033[0m")
 #define clear() printf("\033[H\033[J")
 
-int working_proc[2048], status[2048], count = 0, fin = 0;
+struct comm
+{
+    int pid;
+    char *pname;
+} working_proc[2048];
+
+int status[2048], count = 0, fin = 0;
 int main(int argc, char const *argv[])
 {
     char *username = getenv("USER");
@@ -46,12 +52,12 @@ int main(int argc, char const *argv[])
         {
             if (status[i] == 0)
                 continue;
-            // printf("%d\n", working_proc[i]);
             int sst;
-            int v = waitpid(working_proc[i], &sst, WNOHANG);
+            int v = waitpid(working_proc[i].pid, &sst, WNOHANG);
             if (v == -1)
             {
                 perror("waitpid failed");
+                continue;
             }
             if (v == 0)
             {
@@ -60,7 +66,7 @@ int main(int argc, char const *argv[])
             if (WIFEXITED(sst))
             {
                 const int es = WEXITSTATUS(sst);
-                printf("Process with PID - %d\n", working_proc[i]);
+                printf("Process %s with PID - %d\n", working_proc[i].pname, working_proc[i].pid);
                 if (es == 0)
                 {
                     printf("Exited normally\n");
@@ -73,8 +79,8 @@ int main(int argc, char const *argv[])
                 fin++;
             }
         }
-        if (count - fin > 0)
-            printf("%d background processes\n", count - fin);
+        // if (count - fin > 0)
+        //     printf("%d background processes\n", count - fin);
 
         for (i = 0; i < strlen(home); i++)
         {
@@ -98,10 +104,12 @@ int main(int argc, char const *argv[])
             input[cur++] = ch;
         }
         input[cur] = '\0';
-        int *a = chooseCommand(home, input);
-        for (i = 1; i <= a[0]; i++)
+        struct comm *a = chooseCommand(home, input);
+        for (i = 1; i <= a[0].pid; i++)
         {
-            working_proc[count++] = a[i];
+            working_proc[count].pid = a[i].pid;
+            working_proc[count].pname = a[i].pname;
+            count++;
             status[count - 1] = 1;
         }
     }

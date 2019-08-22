@@ -1,1 +1,1 @@
-int *chooseCommand(char[], char *);
+struct comm *chooseCommand(char[], char *);
