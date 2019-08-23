@@ -46,17 +46,6 @@ int main(int argc, char const *argv[])
         sys_name[ss - 1] = '\0';
         getcwd(curdir, sizeof(curdir));
     }
-    // printf("%s > ", username);
-    // printf("\n");
-
-    // echo("hi");
-    // pwd();
-    // cd(home, "/home/arpan/Documents/..");
-    // pwd();
-    // cd(home, "~/Test");
-    // pwd();
-    // listfiles(home, "~/../Shell", "");
-    // listfiles(home, "/home/arpan/Documents/..", "");
     while (1)
     {
         char input[1024], ch;

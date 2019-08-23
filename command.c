@@ -43,7 +43,7 @@ struct comm *chooseCommand(char home[], char *str)
     int temp[1024];
     char *t2[1024];
 
-    histAdd(str);
+    histAdd(home, str);
     for (j = 1, str1 = str;; j++, str1 = NULL)
     {
         token = strtok_r(str1, ";", &saveptr1);
