@@ -1,4 +1,4 @@
-TARGET = shell
+TARGET = ash
 LIBS = -lm
 CC = gcc
 CFLAGS = -g

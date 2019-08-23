@@ -29,6 +29,23 @@ int main(int argc, char const *argv[])
     initialise(username);
     char home[1024];
     getcwd(home, sizeof(home));
+    char curdir[1024];
+    char sys_name[102];
+    int ss = 0;
+    {
+        FILE *status = fopen("/proc/sys/kernel/hostname", "r");
+        while (1)
+        {
+            char c = fgetc(status);
+            if (feof(status))
+            {
+                break;
+            }
+            sys_name[ss++] = c;
+        }
+        sys_name[ss - 1] = '\0';
+        getcwd(curdir, sizeof(curdir));
+    }
     // printf("%s > ", username);
     // printf("\n");
 
@@ -42,10 +59,7 @@ int main(int argc, char const *argv[])
     // listfiles(home, "/home/arpan/Documents/..", "");
     while (1)
     {
-        char curdir[1024];
         char input[1024], ch;
-        char *sys_name = getenv("SESSION");
-        getcwd(curdir, sizeof(curdir));
         int i, f = 1;
 
         for (i = 0; i < count; i++)
@@ -73,7 +87,7 @@ int main(int argc, char const *argv[])
                 }
                 else
                 {
-                    printf("Exited with exit code %d", es);
+                    printf("Exited with exit code %d\n", es);
                 }
                 status[i] = 0;
                 fin++;

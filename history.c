@@ -22,8 +22,25 @@ void histAdd(char *com)
     strcpy(hist[0], com);
 }
 
-void histDisp(char *num)
+void histDisp(char *home, char *num)
 {
+    // int cline = 0, cpoint = 0;
+    // for(ll)
+    // FILE *status = fopen("", "r");
+    // while (1)
+    // {
+    //     char c = fgetc(status);
+    //     if (feof(status))
+    //     {
+    //         break;
+    //     }
+    //     if (c = '\n')
+    //     {
+    //         cline++;
+    //     }
+    //     else
+    //         hist[cline][cpoint++] = c;
+    // }
     int a = 1;
     if (strlen(num) >= 2)
     {

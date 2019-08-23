@@ -31,7 +31,6 @@ void listfiles(char home[], char *dir, int l_flag, int a_flag)
         dir[0] = '.';
         dir[1] = '\0';
     }
-    // printf("%s -- %d\n", dir, strlen(home));
     if (dir[0] == '~')
     {
         int sz = strlen(home) + strlen(dir) - 1;
@@ -40,7 +39,6 @@ void listfiles(char home[], char *dir, int l_flag, int a_flag)
         for (i = sz - 1; i >= strlen(home); i--)
         {
             dir[i] = temp[i - strlen(home) + 1];
-            // printf("%d ", i - strlen(home) + 1);
         }
         for (i = 0; i < strlen(home); i++)
             dir[i] = home[i];

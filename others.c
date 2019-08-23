@@ -17,12 +17,15 @@ int otherCommands(char *com, char **str, int bg)
     }
     else if (pid == 0)
     {
+        if (bg == 1)
+        {
+            setpgid(0, 0);
+            close(0);
+            close(1);
+            close(2);
+        }
         if (execvp(str[0], str) < 0)
             printf("ERROR: Invalid command\n");
-        setpgid(0, 0);
-        close(0);
-        close(1);
-        close(2);
         return -1;
     }
     else
