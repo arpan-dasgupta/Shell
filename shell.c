@@ -29,7 +29,6 @@ int main(int argc, char const *argv[])
     initialise(username);
     char home[1024];
     getcwd(home, sizeof(home));
-    char curdir[1024];
     char sys_name[102];
     int ss = 0;
     {
@@ -44,10 +43,11 @@ int main(int argc, char const *argv[])
             sys_name[ss++] = c;
         }
         sys_name[ss - 1] = '\0';
-        getcwd(curdir, sizeof(curdir));
     }
     while (1)
     {
+        char curdir[1024];
+        getcwd(curdir, sizeof(curdir));
         char input[1024], ch;
         int i, f = 1;
 
