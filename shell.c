@@ -90,7 +90,7 @@ int main(int argc, char const *argv[])
             if (curdir[i] != home[i])
                 f = 0;
         }
-        if (f == 1)
+        if (f == 1 && (curdir[strlen(home)] == '/' || curdir[strlen(home)] == '\0'))
         {
             curdir[0] = '~';
             int f = 1;
