@@ -1,21 +1,26 @@
 # Shell (ASH)
 
-## Aim 
+## Aim
+
 - To build a shell performing basic operations.
 - Must have cd, ls, pwd and echo inbuilt.
 - Other commands must be implemented using exec.
 
 ## Constraints
+
 - No piping implemented yet.
 - Some unhandled corner cases.
 
 ## Usage
+
 - Run command
-    ``` make; make clean; ./ash``` to build from source
-    or 
-    simply ``` ./ash ``` on terminal
+    `make;make clean;./ash` to build from source
+    or simply
+    `./ash`
+    on terminal
 
 ## Working
+
 - ___shell.c___ - main loop of the shell, output prompt and input command.
 - ___command.c___ - all form of string parsing, command processing and call to respective functions is performed here.
 - ___init.c___ - initializes prompt.

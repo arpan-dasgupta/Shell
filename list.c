@@ -75,9 +75,8 @@ void listfiles(char home[], char *dir, int l_flag, int a_flag)
         struct stat statres;
         char x[1000];
         int p = strlen(newdir);
-        stat(newdir, &statres);
-        printf("total %ld\n", statres.st_size); // TODO
-        // printf("%d -- ", p);
+        lstat(newdir, &statres);
+        // lstat(newdir, &statres);
         if (newdir[p - 1] != '/')
         {
             newdir[p] = '/';
@@ -87,6 +86,51 @@ void listfiles(char home[], char *dir, int l_flag, int a_flag)
         {
             x[i] = newdir[i];
         }
+        long int szz = 0;
+        for (i = 1; i < count + 1; ++i)
+        {
+            char *filname = files[i - 1]->d_name;
+            for (int j = 0; j < strlen(filname); j++)
+            {
+                x[j + strlen(newdir)] = filname[j];
+            }
+            x[strlen(newdir) + strlen(filname)] = '\0';
+            // printf("%s\n", x);
+            if (a_flag == 1 || filname[0] != '.')
+            {
+                if (stat(x, &statres) >= 0)
+                {
+                    szz += statres.st_blocks / 2;
+                }
+            }
+        }
+        if (a_flag == 1)
+        {
+            char *filname = "..";
+            if (strcmp(curdir, "/") != 0)
+            {
+                cd(home, "..");
+                char backdir[1024];
+                getcwd(backdir, sizeof(newdir));
+                cd(home, curdir);
+
+                if (stat(backdir, &statres) >= 0)
+                {
+                    szz += statres.st_blocks / 2;
+                }
+            }
+        }
+        if (a_flag == 1)
+        {
+            char *filname = ".";
+            // printf("%s\n", x);
+            if (stat(curdir, &statres) >= 0)
+            {
+                szz += statres.st_blocks / 2;
+            }
+        }
+        printf("total %ld\n", szz);
+        count = scandir(dir, &files, file_select, alphasort);
         if (a_flag == 1)
         {
             char *filname = ".";
