@@ -13,6 +13,7 @@
 #include "pinfo.h"
 #include "history.h"
 #include "nightswatch.h"
+#include "setenv.h"
 
 #define clear() printf("\033[H\033[J")
 
@@ -165,6 +166,43 @@ struct comm *chooseCommand(char home[], char *str)
             else
             {
                 histDisp(subtoken);
+            }
+        }
+        else if (strcmp(subtoken, "setenv") == 0)
+        {
+            subtoken = strtok_r(NULL, " \t", &saveptr2);
+            if (subtoken == NULL)
+            {
+                printf("Invalid args (1/2 required)\n");
+            }
+            else
+            {
+                subtoken1 = strtok_r(NULL, " \t", &saveptr2);
+                subtoken2 = strtok_r(NULL, " \t", &saveptr2);
+                if (subtoken2 != NULL)
+                {
+                    printf("Invalid args (1/2 required)\n");
+                }
+                else
+                    setenviron(subtoken, subtoken1);
+            }
+        }
+        else if (strcmp(subtoken, "unsetenv") == 0)
+        {
+            subtoken = strtok_r(NULL, " \t", &saveptr2);
+            if (subtoken == NULL)
+            {
+                printf("Invalid args (1 required)\n");
+            }
+            else
+            {
+                subtoken1 = strtok_r(NULL, " \t", &saveptr2);
+                if (subtoken1 != NULL)
+                {
+                    printf("Invalid args (1 required)\n");
+                }
+                else
+                    unsetenviron(subtoken);
             }
         }
         else if (strcmp(subtoken, "nightswatch") == 0)
