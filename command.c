@@ -21,6 +21,7 @@ struct comm
 {
     int pid;
     char pname[1000];
+    int status;
 };
 
 char *trimwhitespace(char *str)
@@ -229,6 +230,11 @@ struct comm *chooseCommand(char home[], char *str)
         else
         {
             char *subt[100];
+            // char *ttt;
+            // char *temporary;
+            // ttt = (char *)realloc(ttt, strlen(ttt) + strlen(subtoken));
+            // strcat(ttt, subtoken);
+            // printf("%s ", ttt);
             subt[0] = subtoken;
             subt[0] = trimwhitespace(subt[0]);
             int i = 1, fl = 0;
@@ -243,12 +249,16 @@ struct comm *chooseCommand(char home[], char *str)
                     fl = 1;
                     i--;
                 }
+                // else
+                // {
+                //     // strcat(ttt, subt[i]);
+                // }
                 i++;
             }
             int x = otherCommands(subtoken, subt, fl);
             if (fl == 1 && x != -1)
             {
-                t2[retcount] = subtoken;
+                t2[retcount] = str1;
                 temp[retcount++] = x;
             }
         }

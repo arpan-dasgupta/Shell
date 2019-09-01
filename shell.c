@@ -20,6 +20,7 @@ struct comm
 {
     int pid;
     char pname[1000];
+    int status;
 } working_proc[2048];
 
 int status[2048], count = 0, fin = 0;
