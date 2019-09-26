@@ -243,7 +243,9 @@ struct comm runCommand1(char home[], char *cmd) {
     returned = chooseCommand(home, cmd);
     return returned;
   }
-  int fd[numcom][2];
+  int orgIn = dup(STDIN_FILENO), orgOut = dup(STDOUT_FILENO);
+
+  int fd[2][2], counter = 0;
   // printf("%s ++ %d\n", cmd, numcom);
   for (j = 1, str1 = cmd;; j++, str1 = NULL) {
     token = strtok_r(str1, "|", &saveptr2);
@@ -251,13 +253,73 @@ struct comm runCommand1(char home[], char *cmd) {
     if (token == NULL) break;
     token = trimwhitespace(token);
     // printf("%s \n", token);
-    numcom++;
-    returned = chooseCommand(home, token);
+    // numcom++;
+    if (counter % 2 != 0) {
+      pipe(fd[0]);
+    } else {
+      pipe(fd[1]);
+    }
+    int cpid = fork();
+
+    if (cpid == -1) {
+      perror("Couldn't fork");
+    }
+    if (cpid == 0) {
+      if (counter == 0) {
+        dup2(fd[1][1], STDOUT_FILENO);
+      } else if (counter == numcom - 1) {
+        if (numcom % 2 != 0) {
+          dup2(fd[0][0], STDIN_FILENO);
+        } else {
+          dup2(fd[1][0], STDIN_FILENO);
+        }
+
+      } else {
+        if (counter % 2 != 0) {
+          dup2(fd[1][0], STDIN_FILENO);
+          dup2(fd[0][1], STDOUT_FILENO);
+        } else {
+          dup2(fd[0][0], STDIN_FILENO);
+          dup2(fd[1][1], STDOUT_FILENO);
+        }
+      }
+
+      // int pid = fork();
+
+      // if(execvp(home, token)){
+
+      // }
+      returned = chooseCommand(home, token);
+      exit(0);
+    } else {
+      if (counter == 0) {
+        close(fd[1][1]);
+      } else if (counter == numcom - 1) {
+        if (numcom % 2 != 0) {
+          close(fd[0][0]);
+        } else {
+          close(fd[1][0]);
+        }
+      } else {
+        if (counter % 2 != 0) {
+          close(fd[1][0]);
+          close(fd[0][1]);
+        } else {
+          close(fd[0][0]);
+          close(fd[1][1]);
+        }
+      }
+    }
+    waitpid(cpid, NULL, 0);
+    counter++;
     // printf("%d ", returned.status);
     if (returned.status == 1) {
       return returned;
     }
   }
+
+  dup2(orgIn, STDIN_FILENO);
+  dup2(orgOut, STDOUT_FILENO);
   return returned;
 }
 

@@ -357,5 +357,5 @@ void listfiles(char home[], char *dir, int l_flag, int a_flag)
             }
         }
     }
-    printf("\n"); /* flush buffer */
+    // printf("\n"); /* flush buffer */
 }
