@@ -24,7 +24,9 @@ int otherCommands(char *com, char **str, int bg)
             close(1);
             close(2);
         }
-        if (execvp(str[0], str) < 0)
+        int rv = execvp(str[0],str);
+        printf("%d ",rv);
+        if (rv < 0)
             printf("ERROR: Invalid command\n");
         return -1;
     }
