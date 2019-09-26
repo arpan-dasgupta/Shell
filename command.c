@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <string.h>
 #include "list.h"
@@ -33,21 +34,71 @@ char *trimwhitespace(char *str) {
 }
 
 struct comm chooseCommand(char home[], char *str) {
-  char *str1, *str2, *subtoken, *subtoken1, *subtoken2;
+  char *str1, *str2, *str3, *subtoken, *subtoken1, *subtoken2, *subtoken3;
   char *token;
-  char *saveptr1, *saveptr2;
+  char *saveptr1, *saveptr2, *saveptr3;
   int j, i, retcount = 0;
   int temp[1024];
   char *t2[1024];
   int fl = 0;
 
+  int orgIn = dup(STDIN_FILENO), orgOut = dup(STDOUT_FILENO);
+
   for (j = 1, str1 = str;; j++, str1 = NULL) {
     token = strtok_r(str1, ";", &saveptr1);
     if (token == NULL) break;
     token = trimwhitespace(token);
-    // printf("%d: %s\n", j, token);
+    char *tempstr = (char *)malloc(sizeof(char) * strlen(token));
+    strcpy(tempstr, token);
+    token = strtok(token, "<>");
+    // printf("%s ", token);
+    // printf("%d: %s\n", j, tempstr);
     subtoken = strtok_r(token, " \t", &saveptr2);
     if (subtoken == NULL) continue;
+    int hh;
+    // printf("%d: %s\n", j, tempstr);
+    for (hh = 1, str3 = tempstr;; hh++, str3 = NULL) {
+      char *tempstring = strtok_r(str3, " \t", &saveptr3);
+      if (tempstring == NULL) break;
+      tempstring = trimwhitespace(tempstring);
+      // printf("%d: %s ++ \n", hh, tempstring);
+      if (strcmp(tempstring, ">") == 0) {
+        str3 = NULL;
+        char *tempstring = strtok_r(str3, " \t", &saveptr3);
+        tempstring = trimwhitespace(tempstring);
+        if (tempstring == NULL) {
+          printf("Invalid redirection\n");
+          break;
+        }
+        int file_d = open(tempstring, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        dup2(file_d, 1);
+      } else if (strcmp(tempstring, ">>") == 0) {
+        str3 = NULL;
+        char *tempstring = strtok_r(str3, " \t", &saveptr3);
+        tempstring = trimwhitespace(tempstring);
+        if (tempstring == NULL) {
+          printf("Invalid redirection\n");
+          break;
+        }
+        int file_d = open(tempstring, O_WRONLY | O_CREAT | O_APPEND, 0644);
+        dup2(file_d, 1);
+      } else if (strcmp(tempstring, "<") == 0) {
+        str3 = NULL;
+        char *tempstring = strtok_r(str3, " \t", &saveptr3);
+        tempstring = trimwhitespace(tempstring);
+        int file_d = open(tempstring, O_RDONLY, 0644);
+        if (file_d == -1) {
+          perror("Unable to Open File: ");
+          exit(0);
+        }
+        if (tempstring == NULL) {
+          printf("Invalid redirection\n");
+          break;
+        }
+        dup2(file_d, 0);
+      }
+    }
+    // printf("%s \n", subtoken);
     if (strcmp(subtoken, "pwd") == 0) {
       pwd();
       continue;
@@ -201,6 +252,8 @@ struct comm chooseCommand(char home[], char *str) {
       }
     }
   }
+  dup2(orgIn, STDIN_FILENO);
+  dup2(orgOut, STDOUT_FILENO);
 
   struct comm ans;
   //    =      (struct comm *)malloc(sizeof(struct comm) * (retcount + 1));
@@ -208,10 +261,8 @@ struct comm chooseCommand(char home[], char *str) {
   //    for (i = 0; i < retcount; i++) {
   ans.pid = temp[0];
   if (retcount > 0) {
-    printf("%s\n", t2[0]);
     for (j = 0; j < strlen(t2[0]); j++) {
       ans.pname[j] = t2[0][j];
-      printf("%c ", ans.pname[j]);
     }
   }
   ans.status = (retcount > 0);
