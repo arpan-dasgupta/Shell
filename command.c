@@ -22,6 +22,7 @@ struct comm {
   int pid;
   char pname[1000];
   int status;
+  int jobs;
 };
 
 char *trimwhitespace(char *str) {
@@ -43,7 +44,7 @@ struct comm chooseCommand(char home[], char *str) {
   int fl = 0;
 
   int orgIn = dup(STDIN_FILENO), orgOut = dup(STDOUT_FILENO);
-
+  int jobs = 0;
   for (j = 1, str1 = str;; j++, str1 = NULL) {
     token = strtok_r(str1, ";", &saveptr1);
     if (token == NULL) break;
@@ -221,6 +222,8 @@ struct comm chooseCommand(char home[], char *str) {
       else {
         printf("Invalid command\n");
       }
+    } else if (strcmp(subtoken, "jobs") == 0) {
+      jobs = 1;
     } else {
       char *subt[100];
       // char *ttt;
@@ -246,8 +249,18 @@ struct comm chooseCommand(char home[], char *str) {
         i++;
       }
       int x = otherCommands(subtoken, subt, fl);
+      // char *ok;
       if (fl == 1 && x != -1) {
-        t2[retcount] = str1;
+        int totlen = 0;
+        for (int k = 0; k < i; k++) {
+          totlen += strlen(subt[k]) + 1;
+        }
+        t2[retcount] = (char *)malloc(sizeof(char) * totlen);
+        t2[retcount][0] = '\0';
+        for (int k = 0; k < i; k++) {
+          strcat(t2[retcount], subt[k]);
+          strcat(t2[retcount], " ");
+        }
         temp[retcount++] = x;
       }
     }
@@ -256,6 +269,7 @@ struct comm chooseCommand(char home[], char *str) {
   dup2(orgOut, STDOUT_FILENO);
 
   struct comm ans;
+  ans.jobs = jobs;
   //    =      (struct comm *)malloc(sizeof(struct comm) * (retcount + 1));
   //    ans.pid = retcount;
   //    for (i = 0; i < retcount; i++) {
@@ -295,7 +309,7 @@ struct comm runCommand1(char home[], char *cmd) {
     return returned;
   }
   int orgIn = dup(STDIN_FILENO), orgOut = dup(STDOUT_FILENO);
-
+  int jb = 0;
   int fd[2][2], counter = 0;
   // printf("%s ++ %d\n", cmd, numcom);
   for (j = 1, str1 = cmd;; j++, str1 = NULL) {
@@ -364,11 +378,12 @@ struct comm runCommand1(char home[], char *cmd) {
     waitpid(cpid, NULL, 0);
     counter++;
     // printf("%d ", returned.status);
+    if (returned.jobs == 1) jb = 1;
     if (returned.status == 1) {
       return returned;
     }
   }
-
+  if (jb) returned.jobs = 1;
   dup2(orgIn, STDIN_FILENO);
   dup2(orgOut, STDOUT_FILENO);
   return returned;
@@ -384,7 +399,7 @@ struct comm *runCommand(char home[], char *cmd) {
   histAdd(home, cmd);
   struct comm ret, tempt[1000];
   char temp[1000];
-
+  int jb = 0;
   for (j = 1, str1 = cmd;; j++, str1 = NULL) {
     token = strtok_r(str1, ";", &saveptr1);
     if (token == NULL) break;
@@ -392,6 +407,7 @@ struct comm *runCommand(char home[], char *cmd) {
     // printf("%s \n", token);
     numcom++;
     ret = runCommand1(home, token);
+    if (ret.jobs == 1) jb = 1;
     if (ret.status == 1) {
       tempt[retcount] = ret;
       retcount++;
@@ -400,9 +416,9 @@ struct comm *runCommand(char home[], char *cmd) {
   struct comm *returned =
       (struct comm *)malloc(sizeof(struct comm) * (retcount + 1));
   returned[0].pid = retcount;
+  returned[0].jobs = jb;
   for (int i = 1; i <= retcount; i++) {
     returned[i] = tempt[i - 1];
   }
-
   return returned;
 }

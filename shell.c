@@ -20,6 +20,7 @@ struct comm {
   int pid;
   char pname[1000];
   int status;
+  int jobs;
 } working_proc[2048];
 
 int status[2048], count = 0, fin = 0;
@@ -102,6 +103,15 @@ int main(int argc, char const *argv[]) {
       printf("%s %d\n", working_proc[count].pname, working_proc[count].pid);
       count++;
       status[count - 1] = 1;
+    }
+    if (a[0].jobs) {
+      for (int i = 0; i < count; i++) {
+        if (status[i] == 1)
+          printf("[%d] Running ", i + 1);
+        else
+          printf("[%d] Stopped ", i + 1);
+        printf("%s [%d] \n", working_proc[i].pname, working_proc[i].pid);
+      }
     }
   }
 
