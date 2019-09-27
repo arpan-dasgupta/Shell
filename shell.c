@@ -11,20 +11,15 @@
 #include "pwd.h"
 #include "echo.h"
 #include "cd.h"
+#include "globalVar.h"
 
 #define makeblue printf("\033[1;34m")
 #define makedef printf("\033[0m")
 #define clear() printf("\033[H\033[J")
 
-struct comm {
-  int pid;
-  char pname[1000];
-  int status;
-  int jobs;
-} working_proc[2048];
-
-int status[2048], count = 0, fin = 0;
+int fin = 0;
 int main(int argc, char const *argv[]) {
+  Proccount = 0;
   char *username = getenv("USER");
   initialise(username);
   char home[1024];
@@ -48,7 +43,7 @@ int main(int argc, char const *argv[]) {
     char input[1024], ch;
     int i, f = 1;
 
-    for (i = 0; i < count; i++) {
+    for (i = 0; i < Proccount; i++) {
       if (status[i] == 0) continue;
       int sst;
       int v = waitpid(working_proc[i].pid, &sst, WNOHANG);
@@ -70,13 +65,12 @@ int main(int argc, char const *argv[]) {
         } else {
           printf("Killed \n");
         }
-
         status[i] = 0;
         fin++;
       }
     }
-    // if (count - fin > 0)
-    //     printf("%d background processes\n", count - fin);
+    // if (Proccount - fin > 0)
+    //     printf("%d background processes\n", Proccount - fin);
 
     for (i = 0; i < strlen(home); i++) {
       if (curdir[i] != home[i]) f = 0;
@@ -98,14 +92,15 @@ int main(int argc, char const *argv[]) {
     input[cur] = '\0';
     struct comm *a = runCommand(home, input);
     for (i = 1; i <= a[0].pid; i++) {
-      working_proc[count].pid = a[i].pid;
-      strcpy(working_proc[count].pname, a[i].pname);
-      printf("%s %d\n", working_proc[count].pname, working_proc[count].pid);
-      count++;
-      status[count - 1] = 1;
+      working_proc[Proccount].pid = a[i].pid;
+      strcpy(working_proc[Proccount].pname, a[i].pname);
+      printf("%s %d\n", working_proc[Proccount].pname,
+             working_proc[Proccount].pid);
+      Proccount++;
+      status[Proccount - 1] = 1;
     }
     if (a[0].jobs) {
-      for (int i = 0; i < count; i++) {
+      for (int i = 0; i < Proccount; i++) {
         if (status[i] == 1)
           printf("[%d] Running ", i + 1);
         else

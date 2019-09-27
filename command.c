@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <string.h>
+#include <signal.h>
 #include "list.h"
 #include "pwd.h"
 #include "echo.h"
@@ -15,15 +16,18 @@
 #include "history.h"
 #include "nightswatch.h"
 #include "setenv.h"
+#include "globalVar.h"
 
 #define clear() printf("\033[H\033[J")
 
-struct comm {
-  int pid;
-  char pname[1000];
-  int status;
-  int jobs;
-};
+struct comm getProcess(int id) {
+  struct comm false;
+  if (id < 1 || id > Proccount) {
+    printf("Invalid job ID");
+    false.status = -1;
+  }
+  return working_proc[id - 1];
+}
 
 char *trimwhitespace(char *str) {
   char *end;
@@ -32,6 +36,15 @@ char *trimwhitespace(char *str) {
   while (end > str && isspace((unsigned char)*end)) end--;
   end[1] = '\0';
   return str;
+}
+
+int stringToInt(char *s) {
+  int sum = 0;
+  for (int i = 0; i < strlen(s); i++) {
+    sum *= 2;
+    sum += (s[i] - '0');
+  }
+  return sum;
 }
 
 struct comm chooseCommand(char home[], char *str) {
@@ -224,6 +237,36 @@ struct comm chooseCommand(char home[], char *str) {
       }
     } else if (strcmp(subtoken, "jobs") == 0) {
       jobs = 1;
+    } else if (strcmp(subtoken, "kjob") == 0) {
+      subtoken = strtok_r(NULL, " \t", &saveptr2);
+      subtoken1 = strtok_r(NULL, " \t", &saveptr2);
+      subtoken = trimwhitespace(subtoken);
+      subtoken1 = trimwhitespace(subtoken1);
+      if (subtoken == NULL || subtoken1 == NULL) {
+        printf("Incorect arguments\n");
+      }
+      int id = stringToInt(subtoken);
+      int sig = stringToInt(subtoken1);
+      struct comm job = getProcess(id);
+      if (job.status != -1) {
+        if (status[id - 1] == 0) {
+          printf("Job had stopped already\n");
+        } else {
+          kill(job.pid, sig);
+        }
+      }
+      // printf("%d %d\n", id, sig);
+    } else if (strcmp(subtoken, "overkill") == 0) {
+      for (int i = 0; i < Proccount; i++) {
+        struct comm job = getProcess(i + 1);
+        if (job.status != -1) {
+          if (status[i] == 0) {
+            // printf("Job had stopped already");
+          } else {
+            kill(job.pid, 9);
+          }
+        }
+      }
     } else {
       char *subt[100];
       // char *ttt;
