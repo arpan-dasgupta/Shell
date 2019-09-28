@@ -18,6 +18,8 @@
 #include "setenv.h"
 #include "globalVar.h"
 
+#define makeblue printf("\033[1;34m")
+#define makedef printf("\033[0m")
 #define clear() printf("\033[H\033[J")
 
 struct comm getProcess(int id) {
@@ -25,9 +27,13 @@ struct comm getProcess(int id) {
   if (id < 1 || id > Proccount) {
     printf("Invalid job ID");
     false.status = -1;
+    return false;
   }
   return working_proc[id - 1];
 }
+
+struct comm *runCommand(char *, char[]);
+// struct comm runCommand1(char[], char *);
 
 char *trimwhitespace(char *str) {
   char *end;
@@ -41,9 +47,10 @@ char *trimwhitespace(char *str) {
 int stringToInt(char *s) {
   int sum = 0;
   for (int i = 0; i < strlen(s); i++) {
-    sum *= 2;
+    sum *= 10;
     sum += (s[i] - '0');
   }
+  // printf("%d ", sum);
   return sum;
 }
 
@@ -244,15 +251,19 @@ struct comm chooseCommand(char home[], char *str) {
       subtoken1 = trimwhitespace(subtoken1);
       if (subtoken == NULL || subtoken1 == NULL) {
         printf("Incorect arguments\n");
+        continue;
       }
       int id = stringToInt(subtoken);
       int sig = stringToInt(subtoken1);
       struct comm job = getProcess(id);
       if (job.status != -1) {
         if (status[id - 1] == 0) {
-          printf("Job had stopped already\n");
+          printf("Job had terminated already\n");
         } else {
           kill(job.pid, sig);
+          status[id - 1] = 0;
+          printf("Process %s with PID - %d killed\n",
+                 working_proc[id - 1].pname, working_proc[id - 1].pid);
         }
       }
       // printf("%d %d\n", id, sig);
@@ -261,11 +272,89 @@ struct comm chooseCommand(char home[], char *str) {
         struct comm job = getProcess(i + 1);
         if (job.status != -1) {
           if (status[i] == 0) {
-            // printf("Job had stopped already");
+            // printf("Job had terminated already");
           } else {
             kill(job.pid, 9);
+            status[i] = 0;
+            printf("Process %s with PID - %d killed\n", working_proc[i].pname,
+                   working_proc[i].pid);
           }
         }
+      }
+    } else if (strcmp(subtoken, "fg") == 0) {
+      subtoken = strtok_r(NULL, " \t", &saveptr2);
+      if (subtoken == NULL) {
+        printf("Required 1 argument\n");
+        continue;
+      }
+      subtoken = trimwhitespace(subtoken);
+      int id = stringToInt(subtoken);
+      struct comm job = getProcess(id);
+      if (job.status == -1) continue;
+      if (status[id - 1] == 0) {
+        printf("Job had terminated already\n");
+      } else {
+        signal(SIGTTIN, SIG_IGN);
+        signal(SIGTTOU, SIG_IGN);
+        tcsetpgrp(0, job.pid);
+        kill(job.pid, SIGCONT);
+
+        int st;
+        waitpid(job.pid, &st, WUNTRACED);
+        tcsetpgrp(0, getpgrp());
+        signal(SIGTTIN, SIG_DFL);
+        signal(SIGTTOU, SIG_DFL);
+
+        printf("[%d] %d continued\n", id, job.pid);
+        status[id - 1] = 0;
+
+        // similar to that of process.c, if we get ctrl z
+        if (WIFSTOPPED(st)) {
+          working_proc[Proccount] = job;
+          Proccount++;
+          status[Proccount - 1] = 1;
+        }
+      }
+    } else if (strcmp(subtoken, "bg") == 0) {
+      subtoken = strtok_r(NULL, " \t", &saveptr2);
+      if (subtoken == NULL) {
+        printf("Required 1 argument\n");
+        continue;
+      }
+      subtoken = trimwhitespace(subtoken);
+      int id = stringToInt(subtoken);
+      struct comm job = getProcess(id);
+      if (job.status == -1) continue;
+      if (status[id - 1] == 0) {
+        printf("Job had terminated already\n");
+      } else {
+      }
+    } else if (subtoken[0] == 27) {
+      int up = 0;
+      for (int i = 2; i < strlen(subtoken); i += 3) {
+        if (subtoken[i] == 'A') up++;
+      }
+      up = (up >= 10) ? 10 : up;
+      char *pcom = upArr(up);
+      // printf("%c \n", subtoken[2]);
+      // continue;
+      // printf("%s ", pcom);
+      // runCommand(home, pcom);
+      makeblue;
+      printf("<%s@%s:%s> >> ", username, sys_name, curdir);
+      makedef;
+      printf("%s\n", pcom);
+      struct comm *a = runCommand(home, pcom);
+      for (i = 1; i <= a[0].pid; i++) {
+        working_proc[Proccount].pid = a[i].pid;
+        strcpy(working_proc[Proccount].pname, a[i].pname);
+        printf("%s %d\n", working_proc[Proccount].pname,
+               working_proc[Proccount].pid);
+        Proccount++;
+        status[Proccount - 1] = 1;
+      }
+      if (a[0].jobs) {
+        marker = 1;
       }
     } else {
       char *subt[100];

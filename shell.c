@@ -1,10 +1,12 @@
 #include <stdio.h>
+#include <ctype.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/dir.h>
 #include <string.h>
+#include <signal.h>
 #include "command.h"
 #include "init.h"
 #include "list.h"
@@ -18,13 +20,90 @@
 #define clear() printf("\033[H\033[J")
 
 int fin = 0;
+
+char *trimwhitespace10(char *str) {
+  char *end;
+  while (isspace((unsigned char)*str)) str++;
+  end = str + strlen(str) - 1;
+  while (end > str && isspace((unsigned char)*end)) end--;
+  end[1] = '\0';
+  return str;
+}
+
+char *getStatusID(int id) {
+  char *pid = (char *)malloc(sizeof(char) * 100);
+  sprintf(pid, "%d", id);
+  // printf("%d", id);
+  // printf("%s\n", pid);
+  char ad1[100] = "/proc/", ad2[100] = "/proc/", ad3[100] = "/proc/";
+  for (int i = 0; i < strlen(pid); i++) {
+    ad3[i + 6] = pid[i];
+  }
+  {
+    ad3[strlen(pid) + 6] = '/';
+    ad3[strlen(pid) + 7] = 's';
+    ad3[strlen(pid) + 8] = 't';
+    ad3[strlen(pid) + 9] = 'a';
+    ad3[strlen(pid) + 10] = 't';
+    ad3[strlen(pid) + 11] = 'u';
+    ad3[strlen(pid) + 12] = 's';
+    ad3[strlen(pid) + 13] = '\0';
+  }
+  char pinf[1000000];
+  int x = 0;
+  {
+    FILE *status = fopen(ad3, "r");
+    while (1) {
+      char c = fgetc(status);
+      if (feof(status)) {
+        break;
+      }
+      pinf[x++] = c;
+    }
+    fclose(status);
+  }
+  pinf[x] = '\n';
+  // printf("%s ", pinf);
+  char *str1, *str2, *subtoken, *subtoken1, *subtoken2;
+  char *token;
+  char token2[1024];
+  char *saveptr1, *saveptr2;
+  int j, i;
+
+  for (j = 1, str1 = pinf;; j++, str1 = NULL) {
+    token = strtok_r(str1, "\n", &saveptr1);
+    if (token == NULL) break;
+    token = trimwhitespace10(token);
+    // printf("%s\n", token);
+    for (i = 0; i <= strlen(token); i++) token2[i] = token[i];
+    subtoken = strtok_r(token, " \t", &saveptr2);
+    subtoken = trimwhitespace10(subtoken);
+    if (subtoken == NULL)
+      continue;
+    else if (strcmp(subtoken, "State:") == 0) {
+      printf("%s ", token2);
+    }
+  }
+}
+
+void sigint(int sn) {
+  // printf("ok");
+  if (curPID > 0 && curPID != getpid()) {
+    raise(SIGINT);
+  }
+}
+void sigstop(int sn) {
+  if (curPID > 0 && curPID != getpid()) raise(SIGTSTP);
+}
+
 int main(int argc, char const *argv[]) {
+  signal(SIGINT, sigint);
+  signal(SIGTSTP, sigstop);
   Proccount = 0;
-  char *username = getenv("USER");
+  marker = 0;
+  username = getenv("USER");
   initialise(username);
-  char home[1024];
   getcwd(home, sizeof(home));
-  char sys_name[102];
   int ss = 0;
   {
     FILE *status = fopen("/proc/sys/kernel/hostname", "r");
@@ -38,7 +117,6 @@ int main(int argc, char const *argv[]) {
     sys_name[ss - 1] = '\0';
   }
   while (1) {
-    char curdir[1024];
     getcwd(curdir, sizeof(curdir));
     char input[1024], ch;
     int i, f = 1;
@@ -68,6 +146,15 @@ int main(int argc, char const *argv[]) {
         status[i] = 0;
         fin++;
       }
+    }
+    if (marker) {
+      for (int i = 0; i < Proccount; i++) {
+        if (status[i] == 0) continue;
+        printf("[%d] ", i + 1);
+        getStatusID(working_proc[i].pid);
+        printf("%s [%d] \n", working_proc[i].pname, working_proc[i].pid);
+      }
+      marker = 0;
     }
     // if (Proccount - fin > 0)
     //     printf("%d background processes\n", Proccount - fin);
@@ -100,13 +187,7 @@ int main(int argc, char const *argv[]) {
       status[Proccount - 1] = 1;
     }
     if (a[0].jobs) {
-      for (int i = 0; i < Proccount; i++) {
-        if (status[i] == 1)
-          printf("[%d] Running ", i + 1);
-        else
-          printf("[%d] Stopped ", i + 1);
-        printf("%s [%d] \n", working_proc[i].pname, working_proc[i].pid);
-      }
+      marker = 1;
     }
   }
 

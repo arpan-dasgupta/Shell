@@ -4,6 +4,7 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <string.h>
+#include <signal.h>
 #include "globalVar.h"
 
 #define clear() printf("\033[H\033[J")
@@ -14,21 +15,30 @@ int otherCommands(char *com, char **str, int bg) {
     printf("\nFailed forking child..");
     return -1;
   } else if (pid == 0) {
-    if (bg == 1) {
-      setpgid(0, 0);
-      close(0);
-      close(1);
-      close(2);
-    }
+    setpgid(0, 0);
     int rv = execvp(str[0], str);
-    printf("%d ", rv);
+    // printf("%d ", rv);
     if (rv < 0) printf("ERROR: Invalid command\n");
     return -1;
   } else {
-    int status;
+    curPID = pid;
     if (bg == 0) {
-      curPID = pid;
-      waitpid(pid, &status, 0);
+      signal(SIGTTIN, SIG_IGN);
+      signal(SIGTTOU, SIG_IGN);
+      setpgid(pid, 0);
+      tcsetpgrp(0, __getpgid(pid));
+      int st;
+      waitpid(pid, &st, WUNTRACED);
+      tcsetpgrp(0, getpgrp());
+      signal(SIGTTIN, SIG_DFL);
+      signal(SIGTTOU, SIG_DFL);
+      if (WIFSTOPPED(st)) {
+        // printf("ok\n");
+        working_proc[Proccount].pid = pid;
+        strcpy(working_proc[Proccount].pname, com);
+        status[Proccount] = 1;
+        Proccount++;
+      }
     }
   }
   return pid;
