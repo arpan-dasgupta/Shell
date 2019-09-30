@@ -356,6 +356,64 @@ struct comm chooseCommand(char home[], char *str) {
       if (a[0].jobs) {
         marker = 1;
       }
+    } else if (strcmp(subtoken, "cronjob") == 0) {
+      subtoken = strtok_r(NULL, " \t", &saveptr2);
+      subtoken1 = strtok_r(NULL, " \t", &saveptr2);
+      char *cc = subtoken1;
+      if (subtoken != NULL && subtoken1 != NULL &&
+          strcmp(subtoken, "-c") == 0) {
+      } else {
+        printf("Invalid arguments\n");
+        continue;
+      }
+      subtoken = strtok_r(NULL, " \t", &saveptr2);
+      subtoken1 = strtok_r(NULL, " \t", &saveptr2);
+      int period;
+      if (subtoken != NULL && subtoken1 != NULL &&
+          strcmp(subtoken, "-t") == 0) {
+        period = stringToInt(subtoken1);
+      } else {
+        printf("Invalid arguments\n");
+        continue;
+      }
+      subtoken = strtok_r(NULL, " \t", &saveptr2);
+      subtoken1 = strtok_r(NULL, " \t", &saveptr2);
+      int limit;
+      if (subtoken != NULL && subtoken1 != NULL &&
+          strcmp(subtoken, "-p") == 0) {
+        limit = stringToInt(subtoken1);
+      } else {
+        printf("Invalid arguments\n");
+        continue;
+      }
+      int ppp = fork();
+      if (ppp == -1) {
+        perror("Forking failed");
+        continue;
+      } else if (ppp == 0) {
+        int timepassed = 0;
+        while (timepassed < limit) {
+          timepassed += period;
+
+          struct comm *a = runCommand(home, cc);
+          for (i = 1; i <= a[0].pid; i++) {
+            working_proc[Proccount].pid = a[i].pid;
+            strcpy(working_proc[Proccount].pname, a[i].pname);
+            printf("%s %d\n", working_proc[Proccount].pname,
+                   working_proc[Proccount].pid);
+            Proccount++;
+            status[Proccount - 1] = 1;
+          }
+          if (a[0].jobs) {
+            marker = 1;
+          }
+          sleep(period);
+        }
+        exit(0);
+      } else {
+        continue;
+      }
+
     } else {
       char *subt[100];
       // char *ttt;
