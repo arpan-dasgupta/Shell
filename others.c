@@ -19,7 +19,8 @@ int otherCommands(char *com, char **str, int bg) {
     int rv = execvp(str[0], str);
     // printf("%d ", rv);
     if (rv < 0) printf("ERROR: Invalid command\n");
-    return -1;
+    exit(0);
+    // return -1;
   } else {
     curPID = pid;
     if (bg == 0) {

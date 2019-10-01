@@ -95,9 +95,16 @@ void sigint(int sn) {
 void sigstop(int sn) {
   if (curPID > 0 && curPID != getpid()) raise(SIGTSTP);
 }
+// void sigchld() {
+//   int st;
+//   printf("here\n");
+//   // waitpid(curPID, &st, WUNTRACED);
+//   wait(NULL);
+// }
 
 int main(int argc, char const *argv[]) {
   signal(SIGINT, sigint);
+  signal(SIGCHLD, SIG_IGN);
   signal(SIGTSTP, sigstop);
   Proccount = 0;
   marker = 0;

@@ -247,12 +247,12 @@ struct comm chooseCommand(char home[], char *str) {
     } else if (strcmp(subtoken, "kjob") == 0) {
       subtoken = strtok_r(NULL, " \t", &saveptr2);
       subtoken1 = strtok_r(NULL, " \t", &saveptr2);
-      subtoken = trimwhitespace(subtoken);
-      subtoken1 = trimwhitespace(subtoken1);
       if (subtoken == NULL || subtoken1 == NULL) {
         printf("Incorect arguments\n");
         continue;
       }
+      subtoken = trimwhitespace(subtoken);
+      subtoken1 = trimwhitespace(subtoken1);
       int id = stringToInt(subtoken);
       int sig = stringToInt(subtoken1);
       struct comm job = getProcess(id);
@@ -335,6 +335,7 @@ struct comm chooseCommand(char home[], char *str) {
         if (subtoken[i] == 'A') up++;
       }
       up = (up >= 10) ? 10 : up;
+      if (up == 0) continue;
       char *pcom = upArr(up);
       // printf("%c \n", subtoken[2]);
       // continue;
@@ -358,7 +359,7 @@ struct comm chooseCommand(char home[], char *str) {
       }
     } else if (strcmp(subtoken, "cronjob") == 0) {
       subtoken = strtok_r(NULL, " \t", &saveptr2);
-      subtoken1 = strtok_r(NULL, " \t", &saveptr2);
+      subtoken1 = strtok_r(NULL, "-", &saveptr2);
       char *cc = subtoken1;
       if (subtoken != NULL && subtoken1 != NULL &&
           strcmp(subtoken, "-c") == 0) {
@@ -366,16 +367,17 @@ struct comm chooseCommand(char home[], char *str) {
         printf("Invalid arguments\n");
         continue;
       }
+      // printf("%s ++%s\n", subtoken, subtoken1);
       subtoken = strtok_r(NULL, " \t", &saveptr2);
       subtoken1 = strtok_r(NULL, " \t", &saveptr2);
       int period;
-      if (subtoken != NULL && subtoken1 != NULL &&
-          strcmp(subtoken, "-t") == 0) {
+      if (subtoken != NULL && subtoken1 != NULL && strcmp(subtoken, "t") == 0) {
         period = stringToInt(subtoken1);
       } else {
         printf("Invalid arguments\n");
         continue;
       }
+      // printf("%s ++%s\n", subtoken, subtoken1);
       subtoken = strtok_r(NULL, " \t", &saveptr2);
       subtoken1 = strtok_r(NULL, " \t", &saveptr2);
       int limit;
@@ -386,9 +388,11 @@ struct comm chooseCommand(char home[], char *str) {
         printf("Invalid arguments\n");
         continue;
       }
+      // printf("%s ++%s\n", subtoken, subtoken1);
+      // continue;
       int ppp = fork();
       if (ppp == -1) {
-        perror("Forking failed");
+        perror("Forking failed\n");
         continue;
       } else if (ppp == 0) {
         int timepassed = 0;

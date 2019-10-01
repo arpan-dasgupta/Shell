@@ -14,21 +14,23 @@
 ## Usage
 
 - Run command
-    `make;make clean;./ash` to build from source
-    or simply
-    `./ash`
-    on terminal
+  `make;make clean;./ash` to build from source
+  or simply
+  `./ash`
+  on terminal
 
 ## Working
 
-- ___shell.c___ - main loop of the shell, output prompt and input command.
-- ___command.c___ - all form of string parsing, command processing and call to respective functions is performed here.
-- ___init.c___ - initializes prompt.
-- ___list.c___ - implements ls and variants.
-- ___pwd.c___ - implements pwd.
-- ___cd.c___ - implements cd and variants.
-- ___echo.c___ - implements echo.
-- ___others.c___ - implements other commands using exec.
-- ___history.c___ - implements history command.
-- ___nightswatch.c___ - implements a specific version of watch command.
-- ___pinfo.c___ - implements pinfo command.
+- **_shell.c_** - main loop of the shell, output prompt and input command.
+- **_command.c_** - all form of string parsing, command processing and call to respective functions is performed here.
+- **_init.c_** - initializes prompt.
+- **_list.c_** - implements ls and variants.
+- **_pwd.c_** - implements pwd.
+- **_cd.c_** - implements cd and variants.
+- **_echo.c_** - implements echo.
+- **_others.c_** - implements other commands using exec.
+- **_history.c_** - implements history command.
+- **_nightswatch.c_** - implements a specific version of watch command.
+- **_pinfo.c_** - implements pinfo command.
+- **_setenv.c_** - implements setenv command.
+- **_unsetenv.c_** - implements unsetenv command.
