@@ -578,7 +578,7 @@ struct comm runCommand1(char home[], char *cmd) {
       }
     }
     int rv = waitpid(cpid, NULL, 0);
-    if (rv < 0) perror("Error ");
+    // if (rv < 0) perror("Error ");
     counter++;
     // printf("%d ", returned.status);
     if (returned.jobs == 1) jb = 1;
