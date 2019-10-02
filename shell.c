@@ -86,23 +86,8 @@ char *getStatusID(int id) {
   }
 }
 
-void sigint(int sn) {
-  // printf("ok");
-  // printf("%d %d \n", curPID, getpid());
-  // if (curPID > 0 && curPID != getpid()) {
-  //   raise(SIGINT);
-  // }
-}
-void sigstop(int sn) {
-  // printf("ok");
-  // if (curPID > 0 && curPID != getpid()) raise(SIGTSTP);
-}
-// void sigchld() {
-//   int st;
-//   printf("here\n");
-//   // waitpid(curPID, &st, WUNTRACED);
-//   wait(NULL);
-// }
+void sigint(int sn) {}
+void sigstop(int sn) {}
 
 int main(int argc, char const *argv[]) {
   signal(SIGINT, sigint);
@@ -112,7 +97,8 @@ int main(int argc, char const *argv[]) {
   marker = 0;
   username = getenv("USER");
   initialise(username);
-  getcwd(home, sizeof(home));
+  int rv = getcwd(home, sizeof(home));
+  // if (rv < 0) perror("Error ");
   int ss = 0;
   {
     FILE *status = fopen("/proc/sys/kernel/hostname", "r");

@@ -209,6 +209,10 @@ struct comm chooseCommand(char home[], char *str) {
       } else {
         subtoken1 = strtok_r(NULL, " \t", &saveptr2);
         subtoken2 = strtok_r(NULL, " \t", &saveptr2);
+        if (subtoken1 == NULL) {
+          subtoken1 = (char *)calloc(1, 3);
+          strcpy(subtoken1, "");
+        }
         if (subtoken2 != NULL) {
           printf("Invalid args (1/2 required)\n");
         } else
@@ -300,7 +304,8 @@ struct comm chooseCommand(char home[], char *str) {
         kill(job.pid, SIGCONT);
 
         int st;
-        waitpid(job.pid, &st, WUNTRACED);
+        int rv = waitpid(job.pid, &st, WUNTRACED);
+        if (rv < 0) perror("Error ");
         tcsetpgrp(0, getpgrp());
         signal(SIGTTIN, SIG_DFL);
         signal(SIGTTOU, SIG_DFL);
@@ -572,7 +577,8 @@ struct comm runCommand1(char home[], char *cmd) {
         }
       }
     }
-    waitpid(cpid, NULL, 0);
+    int rv = waitpid(cpid, NULL, 0);
+    if (rv < 0) perror("Error ");
     counter++;
     // printf("%d ", returned.status);
     if (returned.jobs == 1) jb = 1;
