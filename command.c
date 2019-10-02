@@ -55,13 +55,16 @@ int stringToInt(char *s) {
 }
 
 struct comm chooseCommand(char home[], char *str) {
-  char *str1, *str2, *str3, *subtoken, *subtoken1, *subtoken2, *subtoken3;
+  char *str1, *str2, *str3, *str4, *subtoken, *subtoken1, *subtoken2,
+      *subtoken3;
   char *token;
-  char *saveptr1, *saveptr2, *saveptr3;
+  char *saveptr1, *saveptr2, *saveptr3, *saveptr4;
   int j, i, retcount = 0;
   int temp[1024];
   char *t2[1024];
   int fl = 0;
+  char *copystr = (char *)calloc(1, sizeof(char) * strlen(str));
+  strcpy(copystr, str);
 
   int orgIn = dup(STDIN_FILENO), orgOut = dup(STDOUT_FILENO);
   int jobs = 0;
@@ -69,56 +72,139 @@ struct comm chooseCommand(char home[], char *str) {
     token = strtok_r(str1, ";", &saveptr1);
     if (token == NULL) break;
     token = trimwhitespace(token);
-    char *tempstr = (char *)malloc(sizeof(char) * strlen(token));
+    char *tempstr = (char *)calloc(1, sizeof(char) * strlen(token));
     strcpy(tempstr, token);
+    char *tempstr2 = (char *)calloc(1, sizeof(char) * strlen(token));
+    strcpy(tempstr2, token);
     token = strtok(token, "<>");
+    // token = strtok(token, ">");
     // printf("%s ", token);
     // printf("%d: %s\n", j, tempstr);
     subtoken = strtok_r(token, " \t", &saveptr2);
+    int uu = 0;
     if (subtoken == NULL) continue;
-    int hh;
     // printf("%d: %s\n", j, tempstr);
-    for (hh = 1, str3 = tempstr;; hh++, str3 = NULL) {
-      char *tempstring = strtok_r(str3, " \t", &saveptr3);
-      if (tempstring == NULL) break;
-      tempstring = trimwhitespace(tempstring);
-      // printf("%d: %s ++ \n", hh, tempstring);
-      if (strcmp(tempstring, ">") == 0) {
-        str3 = NULL;
-        char *tempstring = strtok_r(str3, " \t", &saveptr3);
+    {
+      int hh;
+      for (hh = 1, str3 = tempstr;; hh++, str3 = NULL) {
+        char *tempstring = strtok_r(str3, ">", &saveptr3);
+        if (tempstring == NULL) break;
         tempstring = trimwhitespace(tempstring);
-        if (tempstring == NULL) {
-          printf("Invalid redirection\n");
-          break;
+        // printf("%s\n", tempstring);
+        if (hh == 2) {
+          int ojefn = 0;
+          for (int it = 0; it < strlen(copystr) - 1; it++) {
+            // printf("%c", copystr[it]);
+            if (copystr[it] == '>' && copystr[it + 1] == '>') {
+              ojefn = 1;
+              break;
+            } else if (copystr[it] == '>') {
+              ojefn = 0;
+              break;
+            }
+          }
+          // printf("\n");
+          if (ojefn == 0) {
+            // str3 = NULL;
+            // char *tempstring = strtok_r(str3, " \t", &saveptr3);
+            // printf("%s\n", tempstring);
+            tempstring = strtok(tempstring, " \t");
+            tempstring = trimwhitespace(tempstring);
+            // printf("%s\n", tempstring);
+            if (tempstring == NULL) {
+              printf("Invalid redirection\n");
+              // break;
+              uu = 1;
+              goto lab;
+            }
+            int file_d = open(tempstring, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+            dup2(file_d, 1);
+            // printf(">\n");
+          } else {
+            // str3 = NULL;
+            tempstring = strtok(tempstring, " \t");
+            tempstring = trimwhitespace(tempstring);
+            if (tempstring == NULL) {
+              printf("Invalid redirection\n");
+              // break;
+              uu = 1;
+              goto lab;
+            }
+            int file_d = open(tempstring, O_WRONLY | O_CREAT | O_APPEND, 0644);
+            dup2(file_d, 1);
+          }
         }
-        int file_d = open(tempstring, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-        dup2(file_d, 1);
-      } else if (strcmp(tempstring, ">>") == 0) {
-        str3 = NULL;
-        char *tempstring = strtok_r(str3, " \t", &saveptr3);
-        tempstring = trimwhitespace(tempstring);
-        if (tempstring == NULL) {
-          printf("Invalid redirection\n");
-          break;
-        }
-        int file_d = open(tempstring, O_WRONLY | O_CREAT | O_APPEND, 0644);
-        dup2(file_d, 1);
-      } else if (strcmp(tempstring, "<") == 0) {
-        str3 = NULL;
-        char *tempstring = strtok_r(str3, " \t", &saveptr3);
-        tempstring = trimwhitespace(tempstring);
-        int file_d = open(tempstring, O_RDONLY, 0644);
-        if (file_d == -1) {
-          perror("Unable to Open File: ");
-          exit(0);
-        }
-        if (tempstring == NULL) {
-          printf("Invalid redirection\n");
-          break;
-        }
-        dup2(file_d, 0);
       }
     }
+    {
+      int hh;
+      for (hh = 1, str4 = tempstr2;; hh++, str4 = NULL) {
+        char *tempstring = strtok_r(str4, "<", &saveptr4);
+        if (tempstring == NULL) break;
+        tempstring = trimwhitespace(tempstring);
+        // printf("%s\n", tempstring);
+        // printf("%d ", hh);
+        if (hh == 2) {
+          // str4 = NULL;
+          tempstring = strtok(tempstring, " \t");
+          // printf("%s\n", tempstring);
+          tempstring = trimwhitespace(tempstring);
+          printf("%s\n", tempstring);
+          if (tempstring == NULL) {
+            printf("Invalid redirection\n");
+            break;
+          }
+          int file_d = open(tempstring, O_RDONLY, 0644);
+          if (file_d == -1) {
+            perror("Unable to Open File: ");
+            // exit(0);
+            uu = 1;
+            goto lab;
+          }
+          dup2(file_d, 0);
+        }
+      }
+    }
+  lab:
+    if (uu == 1) break;
+    // printf("%d: %s ++ \n", hh, tempstring);
+    //   if (strcmp(tempstring, ">") == 0) {
+    //     str3 = NULL;
+    //     char *tempstring = strtok_r(str3, " \t", &saveptr3);
+    //     tempstring = trimwhitespace(tempstring);
+    //     if (tempstring == NULL) {
+    //       printf("Invalid redirection\n");
+    //       break;
+    //     }
+    //     int file_d = open(tempstring, O_WRONLY | O_CREAT | O_TRUNC,
+    //     0644); dup2(file_d, 1);
+    //   } else if (strcmp(tempstring, ">>") == 0) {
+    //     str3 = NULL;
+    //     char *tempstring = strtok_r(str3, " \t", &saveptr3);
+    //     tempstring = trimwhitespace(tempstring);
+    //     if (tempstring == NULL) {
+    //       printf("Invalid redirection\n");
+    //       break;
+    //     }
+    //     int file_d = open(tempstring, O_WRONLY | O_CREAT | O_APPEND,
+    //     0644); dup2(file_d, 1);
+    //   } else if (strcmp(tempstring, "<") == 0) {
+    //     str3 = NULL;
+    //     char *tempstring = strtok_r(str3, " \t", &saveptr3);
+    //     tempstring = trimwhitespace(tempstring);
+    //     int file_d = open(tempstring, O_RDONLY, 0644);
+    //     if (file_d == -1) {
+    //       perror("Unable to Open File: ");
+    //       // exit(0);
+    //       continue;
+    //     }
+    //     if (tempstring == NULL) {
+    //       printf("Invalid redirection\n");
+    //       break;
+    //     }
+    //     dup2(file_d, 0);
+    //   }
+    // }
     // printf("%s \n", subtoken);
     if (strcmp(subtoken, "pwd") == 0) {
       pwd();
@@ -457,7 +543,7 @@ struct comm chooseCommand(char home[], char *str) {
         for (int k = 0; k < i; k++) {
           totlen += strlen(subt[k]) + 1;
         }
-        t2[retcount] = (char *)malloc(sizeof(char) * totlen);
+        t2[retcount] = (char *)calloc(1, sizeof(char) * totlen);
         t2[retcount][0] = '\0';
         for (int k = 0; k < i; k++) {
           strcat(t2[retcount], subt[k]);
@@ -496,7 +582,7 @@ struct comm runCommand1(char home[], char *cmd) {
   returned.pid = 0;
   returned.status = 0;
   str2 = cmd;
-  char *tmp = (char *)malloc(strlen(cmd) * sizeof(char));
+  char *tmp = (char *)calloc(1, strlen(cmd) * sizeof(char));
   strcpy(tmp, cmd);
   // printf("%s ++ %d\n", cmd, numcom);
   for (j = 1, str1 = tmp;; j++, str1 = NULL) {

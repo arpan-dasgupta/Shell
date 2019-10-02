@@ -31,7 +31,7 @@ char *trimwhitespace10(char *str) {
 }
 
 char *getStatusID(int id) {
-  char *pid = (char *)malloc(sizeof(char) * 100);
+  char *pid = (char *)calloc(1, sizeof(char) * 100);
   sprintf(pid, "%d", id);
   // printf("%d", id);
   // printf("%s\n", pid);
