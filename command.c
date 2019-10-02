@@ -305,7 +305,7 @@ struct comm chooseCommand(char home[], char *str) {
 
         int st;
         int rv = waitpid(job.pid, &st, WUNTRACED);
-        if (rv < 0) perror("Error ");
+        // if (rv < 0) perror("Error ");
         tcsetpgrp(0, getpgrp());
         signal(SIGTTIN, SIG_DFL);
         signal(SIGTTOU, SIG_DFL);
