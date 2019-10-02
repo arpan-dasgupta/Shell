@@ -88,12 +88,14 @@ char *getStatusID(int id) {
 
 void sigint(int sn) {
   // printf("ok");
-  if (curPID > 0 && curPID != getpid()) {
-    raise(SIGINT);
-  }
+  // printf("%d %d \n", curPID, getpid());
+  // if (curPID > 0 && curPID != getpid()) {
+  //   raise(SIGINT);
+  // }
 }
 void sigstop(int sn) {
-  if (curPID > 0 && curPID != getpid()) raise(SIGTSTP);
+  // printf("ok");
+  // if (curPID > 0 && curPID != getpid()) raise(SIGTSTP);
 }
 // void sigchld() {
 //   int st;
@@ -184,7 +186,7 @@ int main(int argc, char const *argv[]) {
       input[cur++] = ch;
     }
     input[cur] = '\0';
-    struct comm *a = runCommand(home, input);
+    struct comm *a = runCommand(home, input, 1);
     for (i = 1; i <= a[0].pid; i++) {
       working_proc[Proccount].pid = a[i].pid;
       strcpy(working_proc[Proccount].pname, a[i].pname);

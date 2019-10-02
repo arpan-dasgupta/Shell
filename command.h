@@ -1,1 +1,1 @@
-struct comm *runCommand(char[], char *);
+struct comm *runCommand(char[], char *, int);

@@ -22,8 +22,8 @@ int otherCommands(char *com, char **str, int bg) {
     exit(0);
     // return -1;
   } else {
-    curPID = pid;
     if (bg == 0) {
+      curPID = pid;
       signal(SIGTTIN, SIG_IGN);
       signal(SIGTTOU, SIG_IGN);
       setpgid(pid, 0);
@@ -33,6 +33,7 @@ int otherCommands(char *com, char **str, int bg) {
       tcsetpgrp(0, getpgrp());
       signal(SIGTTIN, SIG_DFL);
       signal(SIGTTOU, SIG_DFL);
+      curPID = 0;
       if (WIFSTOPPED(st)) {
         // printf("ok\n");
         working_proc[Proccount].pid = pid;

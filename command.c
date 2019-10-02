@@ -32,7 +32,7 @@ struct comm getProcess(int id) {
   return working_proc[id - 1];
 }
 
-struct comm *runCommand(char *, char[]);
+struct comm *runCommand(char *, char[], int);
 // struct comm runCommand1(char[], char *);
 
 char *trimwhitespace(char *str) {
@@ -328,6 +328,7 @@ struct comm chooseCommand(char home[], char *str) {
       if (status[id - 1] == 0) {
         printf("Job had terminated already\n");
       } else {
+        kill(job.pid, SIGCONT);
       }
     } else if (subtoken[0] == 27) {
       int up = 0;
@@ -345,7 +346,7 @@ struct comm chooseCommand(char home[], char *str) {
       printf("<%s@%s:%s> >> ", username, sys_name, curdir);
       makedef;
       printf("%s\n", pcom);
-      struct comm *a = runCommand(home, pcom);
+      struct comm *a = runCommand(home, pcom, 1);
       for (i = 1; i <= a[0].pid; i++) {
         working_proc[Proccount].pid = a[i].pid;
         strcpy(working_proc[Proccount].pname, a[i].pname);
@@ -397,9 +398,12 @@ struct comm chooseCommand(char home[], char *str) {
       } else if (ppp == 0) {
         int timepassed = 0;
         while (timepassed < limit) {
+          sleep(period);
           timepassed += period;
-
-          struct comm *a = runCommand(home, cc);
+          if (timepassed > limit) break;
+          char *ccc = (char *)calloc(1, 1000);
+          strcat(ccc, cc);
+          struct comm *a = runCommand(home, ccc, 0);
           for (i = 1; i <= a[0].pid; i++) {
             working_proc[Proccount].pid = a[i].pid;
             strcpy(working_proc[Proccount].pname, a[i].pname);
@@ -411,7 +415,6 @@ struct comm chooseCommand(char home[], char *str) {
           if (a[0].jobs) {
             marker = 1;
           }
-          sleep(period);
         }
         exit(0);
       } else {
@@ -583,14 +586,14 @@ struct comm runCommand1(char home[], char *cmd) {
   return returned;
 }
 
-struct comm *runCommand(char home[], char *cmd) {
+struct comm *runCommand(char home[], char *cmd, int hadd) {
   char *str1, *str2, *subtoken, *subtoken1, *subtoken2;
   char *token;
   char *saveptr1, *saveptr2;
   int j, i;
   int retcount = 0;
   int numcom = 0;
-  histAdd(home, cmd);
+  if (hadd == 1) histAdd(home, cmd);
   struct comm ret, tempt[1000];
   char temp[1000];
   int jb = 0;
